@@ -1,8 +1,10 @@
+package models;
+
 /**
  * Created by jyot on 4/7/17.
  */
 
-class Node {
+public class Node {
     private String host;
     private int port;
     private String label;

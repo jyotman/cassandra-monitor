@@ -2,6 +2,9 @@
  * Created by jyot on 3/7/17.
  */
 
+import models.Config;
+import models.Node;
+
 import java.util.List;
 
 class Validator {
@@ -18,8 +21,18 @@ class Validator {
 
     void checkHosts(List liveHosts) {
         for (Node node : config.getNodes()) {
-            if (!liveHosts.contains(node.getPrivateIp() + "1"))
+            if (!liveHosts.contains(node.getPrivateIp()))
                 slack.sendMessage("Node Down", node.getHost() + " is down", config.getUserToNotify());
         }
+    }
+
+    void checkMaxThreshold(double current, double threshold, String objectName) {
+        if (current > threshold)
+            slack.sendMessage("Threshold Crossed", node.getHost() + " is above threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
+    }
+
+    void checkMinThreshold(double current, double threshold, String objectName) {
+        if (current < threshold)
+            slack.sendMessage("Threshold Crossed", node.getHost() + " is below threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
     }
 }

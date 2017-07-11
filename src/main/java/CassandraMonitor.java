@@ -3,6 +3,9 @@
  */
 
 import com.google.gson.Gson;
+import models.Config;
+import models.Metric;
+import models.Node;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -50,6 +53,9 @@ public class CassandraMonitor {
     private static void validate(Config config, MBeanServerConnection mBeanServerConnection, Node node) {
         Validator validator = new Validator(config, node);
         validator.checkHosts((List) getMBeanAttribute(mBeanServerConnection, "org.apache.cassandra.db:type=StorageService", "LiveNodes"));
+        for (Metric metric : config.getMetrics()) {
+            validator.checkMaxThreshold((double) getMBeanAttribute(mBeanServerConnection, metric.getObjectName(), metric.getAttribute()), metric.getValue(), metric.getObjectName());
+        }
     }
 
     private static Object getMBeanAttribute(MBeanServerConnection mBeanServerConnection, String objectName, String attribute) {
