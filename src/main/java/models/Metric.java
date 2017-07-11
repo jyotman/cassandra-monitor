@@ -22,7 +22,7 @@ public class Metric {
         return type;
     }
 
-    public double getValue() {
+    public Object getValue() {
         return value;
     }
 }

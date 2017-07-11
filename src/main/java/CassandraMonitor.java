@@ -54,7 +54,11 @@ public class CassandraMonitor {
         Validator validator = new Validator(config, node);
         validator.checkHosts((List) getMBeanAttribute(mBeanServerConnection, "org.apache.cassandra.db:type=StorageService", "LiveNodes"));
         for (Metric metric : config.getMetrics()) {
-            validator.checkMaxThreshold((double) getMBeanAttribute(mBeanServerConnection, metric.getObjectName(), metric.getAttribute()), metric.getValue(), metric.getObjectName());
+            Object currentValue = getMBeanAttribute(mBeanServerConnection, metric.getObjectName(), metric.getAttribute());
+            if (metric.getValue() instanceof Double && currentValue instanceof Double)
+                validator.checkThreshold((double) currentValue, (double) metric.getValue(), metric.getObjectName(), metric.getType());
+            else if (metric.getValue() instanceof Double && currentValue instanceof Integer)
+                validator.checkThreshold((int) currentValue, (double) metric.getValue(), metric.getObjectName(), metric.getType());
         }
     }
 
