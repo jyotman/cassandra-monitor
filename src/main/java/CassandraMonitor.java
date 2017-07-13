@@ -59,6 +59,8 @@ public class CassandraMonitor {
                 validator.checkThreshold((double) currentValue, metric);
             else if (metric.getValue() instanceof Double && currentValue instanceof Integer)
                 validator.checkThreshold((int) currentValue, metric);
+            else if (metric.getValue() instanceof Double && currentValue instanceof Long)
+                validator.checkThreshold((long) currentValue, metric);
         }
     }
 
