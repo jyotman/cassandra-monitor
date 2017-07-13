@@ -10,6 +10,11 @@ public class Metric {
     private String type;
     private double value;
 
+    public Metric(String objectName, String attribute) {
+        this.objectName = objectName;
+        this.attribute = attribute;
+    }
+
     public String getObjectName() {
         return objectName;
     }

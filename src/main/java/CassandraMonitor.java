@@ -12,19 +12,17 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CassandraMonitor {
 
-    public static void main(String args[]) throws ScriptException, MalformedURLException, FileNotFoundException {
+    public static void main(String args[]) throws Exception {
 
         Config config = loadConfig();
 
@@ -43,34 +41,31 @@ public class CassandraMonitor {
         }
     }
 
-    private static Config loadConfig() throws ScriptException, FileNotFoundException {
+    private static Config loadConfig() throws FileNotFoundException {
         String path = System.getenv("CONFIG");
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String jsonString = String.join("\n", reader.lines().collect(Collectors.toList())).replaceAll("\n", "").replaceAll(" ", "");
         return new Gson().fromJson(jsonString, Config.class);
     }
 
-    private static void validate(Config config, MBeanServerConnection mBeanServerConnection, Node node) {
+    private static void validate(Config config, MBeanServerConnection mBeanServerConnection, Node node) throws Exception {
         Validator validator = new Validator(config, node);
-        validator.checkHosts((List) getMBeanAttribute(mBeanServerConnection, "org.apache.cassandra.db:type=StorageService", "LiveNodes"));
+
+        validator.checkHosts((List) getMBeanAttribute(mBeanServerConnection, new Metric("org.apache.cassandra.db:type=StorageService", "LiveNodes")));
+
         for (Metric metric : config.getMetrics()) {
-            Object currentValue = getMBeanAttribute(mBeanServerConnection, metric.getObjectName(), metric.getAttribute());
+            Object currentValue = getMBeanAttribute(mBeanServerConnection, metric);
             if (metric.getValue() instanceof Double && currentValue instanceof Double)
-                validator.checkThreshold((double) currentValue, (double) metric.getValue(), metric.getObjectName(), metric.getType());
+                validator.checkThreshold((double) currentValue, metric);
             else if (metric.getValue() instanceof Double && currentValue instanceof Integer)
-                validator.checkThreshold((int) currentValue, (double) metric.getValue(), metric.getObjectName(), metric.getType());
+                validator.checkThreshold((int) currentValue, metric);
         }
     }
 
-    private static Object getMBeanAttribute(MBeanServerConnection mBeanServerConnection, String objectName, String attribute) {
-        try {
-            ObjectName mObjectName = new ObjectName(objectName);
-            Set<ObjectName> names = mBeanServerConnection.queryNames(mObjectName, null);
-            ObjectName on = (ObjectName) names.toArray()[0];
-            return mBeanServerConnection.getAttribute(on, attribute);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private static Object getMBeanAttribute(MBeanServerConnection mBeanServerConnection, Metric metric) throws Exception {
+        ObjectName mObjectName = new ObjectName(metric.getObjectName());
+        Set<ObjectName> names = mBeanServerConnection.queryNames(mObjectName, null);
+        ObjectName on = (ObjectName) names.toArray()[0];
+        return mBeanServerConnection.getAttribute(on, metric.getAttribute());
     }
 }

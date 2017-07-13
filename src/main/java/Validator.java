@@ -3,6 +3,7 @@
  */
 
 import models.Config;
+import models.Metric;
 import models.Node;
 
 import java.util.List;
@@ -26,24 +27,15 @@ class Validator {
         }
     }
 
-    void checkThreshold(double current, double threshold, String objectName, String type) {
-        if (type.equals("max")) {
+    void checkThreshold(double current, Metric metric) {
+        double threshold = (double) metric.getValue();
+        if (metric.getType().equals("max")) {
             if (current > threshold)
-                slack.sendMessage("Threshold Crossed", node.getHost() + " is above threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
-        } else if (type.equals("min")) {
+                slack.sendMessage("Threshold Crossed", node.getHost() + " is above threshold for metric " + metric.getObjectName(), config.getUserToNotify(), current, threshold);
+        } else if (metric.getType().equals("min")) {
             if (current < threshold)
-                slack.sendMessage("Threshold Crossed", node.getHost() + " is below threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
+                slack.sendMessage("Threshold Crossed", node.getHost() + " is below threshold for metric " + metric.getObjectName(), config.getUserToNotify(), current, threshold);
         }
 
-    }
-
-    void checkThreshold(int current, double threshold, String objectName, String type) {
-        if (type.equals("max")) {
-            if (current > threshold)
-                slack.sendMessage("Threshold Crossed", node.getHost() + " is above threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
-        } else if (type.equals("min")) {
-            if (current < threshold)
-                slack.sendMessage("Threshold Crossed", node.getHost() + " is below threshold for metric " + objectName, config.getUserToNotify(), current, threshold);
-        }
     }
 }
