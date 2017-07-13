@@ -3,13 +3,13 @@
 #### A java application to monitor your Cassandra cluster using the JMX interface exposed by the Cassandra nodes and report it via Slack messages.
 
 
-# About
+## About
 
 It takes a JSON config file as input which contains information regarding your Cassandra cluster and the metrics which need to be tracked.
 
 It then evaluates each of the metrics provided in the config file along with some pre defined metrics to check if there's any problem with the cluster. If a problem is found in any node then it is reported through [Slack webhooks](https://api.slack.com/incoming-webhooks).
 
-# Configuration
+## Configuration
 
 Sample config.json file - 
 
@@ -83,7 +83,7 @@ Sample config.json file -
 3. slackWebhook - Slack channel's webhook URL which would receive the alerts.
 4. metrics - Array containg all the metrics which would be evaluated for each node in the cluster. `type` represents whether the result of the metric should be below the `max` limit or above the `min` limit.
 
-# Metric
+## Metric
 Lets consider the following metric - 
 ```json
 {
@@ -100,7 +100,7 @@ You may include as many metrics as you like.
 
 Along with the metrics specified in the `metrics` Array, some default metrics are also tracked. For example cassandra-monitor automatically makes sure that all the nodes in the cluster are live. If any Node is found to be down then it will also be reported.
 
-# Usage
+## Usage
 1. Make sure all nodes have the JMX port (specified in the config) open to this app.
 2. Download the .jar file from the [latest release](https://github.com/jyotman/cassandra-monitor/releases).
 3. Make sure you have JRE.
