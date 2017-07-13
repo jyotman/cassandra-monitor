@@ -25,6 +25,7 @@ public class CassandraMonitor {
     public static void main(String args[]) throws Exception {
 
         Config config = loadConfig();
+        System.out.println("Config loaded");
 
         for (Node node : config.getNodes()) {
             String url = "service:jmx:rmi:///jndi/rmi://" + node.getHost() + ":" + node.getPort() + "/jmxrmi";
@@ -33,6 +34,7 @@ public class CassandraMonitor {
             try {
                 JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceUrl, null);
                 MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+                System.out.println("Node connected " + node.getHost() + ":" + node.getPort() + ". Validating results...");
                 validate(config, mBeanServerConnection, node);
                 jmxConnector.close();
             } catch (IOException e) {
